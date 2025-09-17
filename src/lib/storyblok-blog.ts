@@ -159,19 +159,65 @@ export async function getAllPosts(): Promise<BlogPost[]> {
 }
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
-  // Let getAllPosts() errors bubble up naturally
-  const posts = await getAllPosts();
-  return posts.find((post) => post.slug === slug) || null;
+  if (!process.env.NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN) {
+    throw new Error(
+      "NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN is required but not set. Please configure your Storyblok access token.",
+    );
+  }
+
+  const { data } = await storyblok.get(`cdn/stories/blog/${slug}`, {
+    version: "published",
+  });
+
+  if (!data || !data.story) {
+    return null;
+  }
+
+  return storyblokToBlogPost(data.story);
 }
 
 // Get all post IDs for static generation
 export async function getPostIds(): Promise<string[]> {
-  const posts = await getAllPosts();
-  return posts.map((post) => post.id);
+  if (!process.env.NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN) {
+    throw new Error(
+      "NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN is required but not set. Please configure your Storyblok access token.",
+    );
+  }
+
+  const { data } = await storyblok.get("cdn/stories", {
+    starts_with: "blog/",
+    version: "published",
+    excluding_fields: "content",
+  });
+
+  if (!data || !data.stories) {
+    throw new Error(
+      "Invalid response from Storyblok API: missing stories data. This could indicate an API issue or incorrect space configuration.",
+    );
+  }
+
+  return data.stories.map((story: any) => story.id.toString());
 }
 
 // Get all post slugs for static generation
 export async function getPostSlugs(): Promise<string[]> {
-  const posts = await getAllPosts();
-  return posts.map((post) => post.slug);
+  if (!process.env.NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN) {
+    throw new Error(
+      "NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN is required but not set. Please configure your Storyblok access token.",
+    );
+  }
+
+  const { data } = await storyblok.get("cdn/stories", {
+    starts_with: "blog/",
+    version: "published",
+    excluding_fields: "content",
+  });
+
+  if (!data || !data.stories) {
+    throw new Error(
+      "Invalid response from Storyblok API: missing stories data. This could indicate an API issue or incorrect space configuration.",
+    );
+  }
+
+  return data.stories.map((story: any) => story.slug);
 }
