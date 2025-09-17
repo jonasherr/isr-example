@@ -158,10 +158,10 @@ export async function getAllPosts(): Promise<BlogPost[]> {
   return data.stories.map(storyblokToBlogPost);
 }
 
-export async function getPostById(id: string): Promise<BlogPost | null> {
+export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
   // Let getAllPosts() errors bubble up naturally
   const posts = await getAllPosts();
-  return posts.find((post) => post.id === id) || null;
+  return posts.find((post) => post.slug === slug) || null;
 }
 
 // Get all post IDs for static generation

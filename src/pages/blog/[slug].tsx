@@ -1,15 +1,19 @@
 import type { GetStaticPaths, GetStaticProps } from "next";
 import Link from "next/link";
-import { type BlogPost, getPostById, getPostIds } from "@/lib/storyblok-blog";
+import {
+  type BlogPost,
+  getPostBySlug,
+  getPostSlugs,
+} from "@/lib/storyblok-blog";
 
 interface Props {
   post: BlogPost;
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const ids = await getPostIds();
-  const paths = ids.map((id) => ({
-    params: { id },
+  const slugs = await getPostSlugs();
+  const paths = slugs.map((slug) => ({
+    params: { slug },
   }));
 
   // Pre-render only the first 2 posts at build time
@@ -22,15 +26,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const id = params?.id as string;
+  const slug = params?.slug as string;
 
-  if (!id) {
+  if (!slug) {
     return {
       notFound: true,
     };
   }
 
-  const post = await getPostById(id);
+  const post = await getPostBySlug(slug);
 
   if (!post) {
     return {

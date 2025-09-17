@@ -40,7 +40,7 @@ export default function BlogIndex({ posts }: Props) {
               <div className="p-6">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-3">
                   <Link
-                    href={`/blog/${post.id}`}
+                    href={`/blog/${post.slug}`}
                     className="hover:text-blue-600 transition-colors"
                   >
                     {post.title}
